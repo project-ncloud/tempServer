@@ -8,6 +8,7 @@ from Directories        import Directories
 from pathlib            import Path
 from middleware         import *
 from validation         import *
+from flask_cors import CORS, cross_origin
 
 from flask_jwt_extended import (
     JWTManager, jwt_required, create_access_token,
@@ -17,6 +18,8 @@ from flask_jwt_extended import (
 
 
 app = Flask(__name__)
+#cors = CORS(app, resources={r"*": {"origins": "*", "supports_credentials": True}})
+CORS(app)
 app.config['JWT_SECRET_KEY'] = getenv('SECRET_KEY')
 jwt = JWTManager(app)
 
@@ -42,7 +45,7 @@ def host():
 
 @app.route('/alive/', methods = ['GET', 'POST', 'DELETE'])
 def is_alive():
-    return jsonify({})
+    return jsonify({"is_running" : True, "status" : True})
 
 @app.route('/init/', methods = ['GET', 'POST', 'DELETE'])
 def alive():
@@ -77,14 +80,13 @@ def uploadFile():
         return allowCors(jsonify({"msg": "Invalid Path"}), 400)
 
 
-@app.route("/file/download/")
-def downloadFile():
+@app.route("/testRoute/", methods = ["GET", "POST"])
+def heelo():
     req = request.args
     if isValidPath({"path": safe_join(req.get('path'), req.get('file_name'))}, False):
         return send_from_directory(Path(req.get('path')), filename = req.get('file_name'), as_attachment=True)
     else:
         return allowCors(jsonify({"msg" : "Invalid Path"}), 400)
-
 
 
 @app.route("/dir/", methods = ['POST'])
