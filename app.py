@@ -52,9 +52,7 @@ def alive():
     return jsonify({})
 
 
-@app.route('/dir/')
-@jwt_required
-@onlyselfAllowed
+@app.route('/dirEx/')
 def getDirs():
     req = request.json
 
@@ -89,9 +87,9 @@ def heelo():
         return allowCors(jsonify({"msg" : "Invalid Path"}), 400)
 
 
-@app.route("/dir/", methods = ['POST'])
+@app.route("/dir/", methods = ['GET'])
 def getFolder():
-    req = request.json
+    req = request.args
     path = req.get('path')
 
     if path:

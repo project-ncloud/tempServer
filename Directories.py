@@ -1,4 +1,5 @@
 from pathlib            import Path
+import platform
 
 
 class Directories:
@@ -38,7 +39,7 @@ class Directories:
                 extension = fullPath[fullPath.rfind('.') : ]
 
             data.append({
-                "name": fullPath[fullPath.rfind('\\') + 1:],
+                "name": fullPath[fullPath.rfind('\\' if platform.system() == 'Windows' else '/') + 1:],
                 "extension" : extension,
                 "is_dir" : item.is_dir(),
                 "stat" : mtime,
