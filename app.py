@@ -12,7 +12,7 @@ from flask_cors import CORS, cross_origin
 
 from flask_jwt_extended import (
     JWTManager, jwt_required, create_access_token,
-    get_jwt_identity
+    get_jwt_identity, decode_token
 )
 
 
@@ -67,9 +67,20 @@ def getDirs():
 
 
 @app.route('/file/upload/', methods = ['GET', 'POST'])
+@jwt_required
 def uploadFile():
     files = request.files
     req = request.args
+
+    token = req.get("token")
+    tokenData = decode_token(token)
+
+    tokenIdentity = tokenData.get("identity")
+
+    if tokenIdentity.get("username") != get_jwt_identity():
+        return allowCors(jsonify({"msg" : "Corrupted user"}), 400)
+        #Pending
+        pass
 
     if isValidPath(req):
         files['file'].save(path.join(req.get('path'), files['file'].filename))
@@ -81,6 +92,20 @@ def uploadFile():
 @app.route("/testRoute/", methods = ["GET", "POST"])
 def heelo():
     req = request.args
+
+    mainToken = decode_token(req.get("m_token"))
+    token = req.get("token")
+
+    tokenData = decode_token(token)
+
+    tokenIdentity = tokenData.get("identity")
+
+    if tokenIdentity.get("username") != mainToken.get("identity"):
+        return allowCors(jsonify({"msg" : "Corrupted user"}), 400)
+        #Pending
+        pass
+
+
     if isValidPath({"path": safe_join(req.get('path'), req.get('file_name'))}, False):
         return send_from_directory(Path(req.get('path')), filename = req.get('file_name'), as_attachment=True)
     else:
@@ -88,8 +113,20 @@ def heelo():
 
 
 @app.route("/dir/", methods = ['GET'])
+@jwt_required
 def getFolder():
     req = request.args
+
+    token = req.get("token")
+    tokenData = decode_token(token)
+
+    tokenIdentity = tokenData.get("identity")
+
+    if tokenIdentity.get("username") != get_jwt_identity():
+        return allowCors(jsonify({"msg" : "Corrupted user"}), 400)
+        #Pending
+        pass
+
     path = req.get('path')
 
     if path:
